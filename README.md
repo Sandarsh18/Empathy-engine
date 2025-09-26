@@ -189,7 +189,7 @@ graph TB
     
     subgraph "🧠 AI Processing Engine"
         EMOTION[🎭 Emotion Detection<br/>95.7% Accuracy]
-        LLM[🤖 Multi-LLM Router<br/>Gemini | Perplexity]
+        LLM[🤖 Multi-LLM Router<br/>Gemini + Perplexity]
         SENTIMENT[📊 Sentiment Analysis<br/>Real-time Processing]
     end
     
@@ -331,30 +331,28 @@ sequenceDiagram
 ### � **Advanced AI Intelligence Matrix**
 
 ```mermaid
-mindmap
-  root((🌟 Empathy Engine AI))
-    🎭 Emotion Detection
-      😢 Sadness Recognition
-      😰 Anxiety Detection  
-      😡 Anger Management
-      😊 Joy Enhancement
-      😨 Fear Support
-      😑 Neutral State
-    🤖 LLM Integration
-      💎 Gemini 2.0 Flash
-      🔍 Perplexity AI
-      🎯 Mock Testing
-      🔄 Auto Fallback
-    📊 Analytics Engine
-      📈 Sentiment Trends
-      🎯 Personalization
-      📋 Progress Tracking
-      🔮 Predictive Insights
-    🗣️ Voice AI
-      🎙️ Speech-to-Text
-      🔊 Text-to-Speech
-      � Emotion in Voice
-      🌍 Multi-Language
+graph TB
+    A[🌟 Empathy Engine AI] --> B[🎭 Emotions]
+    A --> C[🤖 LLM Router]
+    A --> D[� Analytics]
+    A --> E[�️ Voice AI]
+    
+    B --> B1[� Sadness]
+    B --> B2[� Anxiety]
+    B --> B3[� Anger]
+    B --> B4[😊 Joy]
+    
+    C --> C1[💎 Gemini]
+    C --> C2[🔍 Perplexity]
+    C --> C3[🔄 Fallback]
+    
+    D --> D1[📈 Trends]
+    D --> D2[🎯 Personal]
+    D --> D3[📋 Progress]
+    
+    E --> E1[🎙️ STT]
+    E --> E2[🔊 TTS]
+    E --> E3[🌍 Multi-Lang]
 ```
 
 ### ✨ **Revolutionary Features Showcase**
@@ -607,18 +605,14 @@ docker-compose up --build
 ### 🌟 **Contributing to Mental Health Revolution**
 
 ```mermaid
-gitgraph
-    commit id: "� Fork Repository"
-    branch feature/amazing-feature
-    checkout feature/amazing-feature
-    commit id: "🔧 Develop Feature"
-    commit id: "🧪 Add Tests"
-    commit id: "📝 Document Changes"
-    checkout main
-    commit id: "🔄 Sync Main"
-    merge feature/amazing-feature
-    commit id: "🎉 Feature Released"
-    commit id: "🚀 Deploy to Production"
+graph LR
+    A[🍴 Fork Repo] --> B[🌿 Create Branch]
+    B --> C[🔧 Develop Feature]
+    C --> D[🧪 Add Tests]
+    D --> E[📝 Document Changes]
+    E --> F[📤 Create PR]
+    F --> G[� Code Review]
+    G --> H[🎉 Merge & Deploy]
 ```
 
 ### 🎯 **Contribution Workflow**
