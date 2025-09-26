@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MH Companion Emotion Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        .emotion-demo {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .happy { 
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border-left: 4px solid #4ade80;
+        }
+        .sad { 
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 4px solid #60a5fa;
+        }
+        .anxious { 
+            background: linear-gradient(135deg, #fed7aa, #fdba74);
+            border-left: 4px solid #fb923c;
+        }
+        .frustrated { 
+            background: linear-gradient(135deg, #fecaca, #fca5a5);
+            border-left: 4px solid #f87171;
+        }
+        .excited { 
+            background: linear-gradient(135deg, #e9d5ff, #d8b4fe);
+            border-left: 4px solid #e879f9;
+        }
+        .worried { 
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 4px solid #a78bfa;
+        }
+        .emotion-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+        .api-result {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧠 MH Companion Emotion-Aware UI Test</h1>
+        
+        <div class="test-section">
+            <h2>✨ Emotion Visual Demonstrations</h2>
+            <p>These show how different emotions are visually represented:</p>
+            
+            <div class="emotion-demo happy">
+                <span class="emotion-icon">😊</span>
+                <div>
+                    <strong>Happy Emotion</strong><br>
+                    Green gradient with bright, welcoming colors
+                </div>
+            </div>
+            
+            <div class="emotion-demo excited">
+                <span class="emotion-icon">🤩</span>
+                <div>
+                    <strong>Excited Emotion</strong><br>
+                    Purple gradient with energetic vibes
+                </div>
+            </div>
+            
+            <div class="emotion-demo anxious">
+                <span class="emotion-icon">😰</span>
+                <div>
+                    <strong>Anxious Emotion</strong><br>
+                    Orange gradient suggesting alertness and concern
+                </div>
+            </div>
+            
+            <div class="emotion-demo sad">
+                <span class="emotion-icon">😢</span>
+                <div>
+                    <strong>Sad Emotion</strong><br>
+                    Blue gradient conveying calm and soothing tones
+                </div>
+            </div>
+            
+            <div class="emotion-demo frustrated">
+                <span class="emotion-icon">😤</span>
+                <div>
+                    <strong>Frustrated Emotion</strong><br>
+                    Red gradient indicating intensity and urgency
+                </div>
+            </div>
+            
+            <div class="emotion-demo worried">
+                <span class="emotion-icon">😟</span>
+                <div>
+                    <strong>Worried Emotion</strong><br>
+                    Amber gradient suggesting caution and attention
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🧪 Live API Testing</h2>
+            <p>Test the emotion detection backend with different messages:</p>
+            
+            <button class="test-button" onclick="testEmotion('I am so excited about this new project! It makes me really happy!')">
+                Test Happy/Excited Message
+            </button>
+            
+            <button class="test-button" onclick="testEmotion('I am really worried about my upcoming presentation. I feel so anxious and stressed.')">
+                Test Anxious/Worried Message
+            </button>
+            
+            <button class="test-button" onclick="testEmotion('I am so frustrated with this situation. Nothing seems to be working right.')">
+                Test Frustrated Message
+            </button>
+            
+            <button class="test-button" onclick="testEmotion('I feel really sad today. Everything seems overwhelming.')">
+                Test Sad Message
+            </button>
+            
+            <div id="api-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎯 Features Summary</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div>
+                    <h3>✅ Completed Features:</h3>
+                    <ul>
+                        <li><strong>Multi-Dimensional Emotion Detection</strong> - 6 emotions with confidence scores</li>
+                        <li><strong>Dynamic Color Styling</strong> - Messages change colors based on emotions</li>
+                        <li><strong>Gradient Backgrounds</strong> - Emotion-specific gradients for bot messages</li>
+                        <li><strong>Animated Icons</strong> - Emotion indicators with CSS animations</li>
+                        <li><strong>Voice Input (Web)</strong> - Web Speech API integration</li>
+                        <li><strong>Text-to-Speech</strong> - Bot responses can be read aloud</li>
+                        <li><strong>Mobile App</strong> - React Native Expo app with emotion UI</li>
+                        <li><strong>Push Notifications</strong> - Mood tracking reminders</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>🔧 Technical Implementation:</h3>
+                    <ul>
+                        <li><strong>Backend:</strong> FastAPI with lexicon-based emotion analysis</li>
+                        <li><strong>Frontend:</strong> React with TypeScript and emotion-aware styling</li>
+                        <li><strong>Mobile:</strong> React Native with Expo for cross-platform support</li>
+                        <li><strong>APIs:</strong> Web Speech API, Expo Speech/Audio, Expo Notifications</li>
+                        <li><strong>Styling:</strong> CSS custom properties with dynamic color system</li>
+                        <li><strong>Animations:</strong> CSS keyframes for emotion-specific effects</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testEmotion(text) {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div style="color: #666;">Testing emotion detection...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Create emotion-styled result display
+                const emotionClass = data.emotion || 'neutral';
+                const confidencePercent = Math.round((data.emotion_confidence || 0) * 100);
+                
+                resultsDiv.innerHTML = `
+                    <div class="api-result">
+                        <div class="emotion-demo ${emotionClass}" style="margin-bottom: 15px;">
+                            <span class="emotion-icon">${getEmotionIcon(data.emotion)}</span>
+                            <div>
+                                <strong>Detected Emotion: ${data.emotion}</strong> (${confidencePercent}% confidence)<br>
+                                Sentiment: ${data.sentiment}
+                            </div>
+                        </div>
+                        <strong>Input:</strong> "${text}"
+                        
+                        <strong>Bot Response:</strong> ${data.reply}
+                        
+                        <strong>Debug Info:</strong>
+                        - Sentiment Score: ${data.debug.score}
+                        - Positive Words: [${data.debug.pos_hits.join(', ')}]
+                        - Negative Words: [${data.debug.neg_hits.join(', ')}]
+                        - Emotion Breakdown: ${JSON.stringify(data.debug.emotion_scores, null, 2)}
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="api-result" style="background: #ffe6e6; border-color: #dc3545;">
+                        <strong>Error:</strong> ${error.message}
+                        <br><br>
+                        Make sure the backend server is running on http://localhost:8000
+                    </div>
+                `;
+            }
+        }
+        
+        function getEmotionIcon(emotion) {
+            const icons = {
+                happy: '😊',
+                sad: '😢',
+                anxious: '😰',
+                frustrated: '😤',
+                excited: '🤩',
+                worried: '😟',
+                neutral: '😐'
+            };
+            return icons[emotion] || '🤔';
+        }
+        
+        // Test the API connection on page load
+        window.onload = function() {
+            testEmotion('Hello! This is a test message to check if the emotion detection is working properly.');
+        };
+    </script>
+</body>
+</html>

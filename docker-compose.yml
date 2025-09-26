@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mh-companion-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - DEBUG=true
+    volumes:
+      - ./backend:/app
+      - ./config:/app/config
+    restart: unless-stopped
+
+  mh-companion-frontend:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend-web:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - mh-companion-backend
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: mh-companion-dev

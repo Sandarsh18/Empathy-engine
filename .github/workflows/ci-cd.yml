@@ -1,0 +1,287 @@
+name: 🧪 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # =============================================================================
+  # Backend Testing
+  # =============================================================================
+  backend-tests:
+    name: 🐍 Backend Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+        
+    - name: 🧪 Run Tests
+      run: |
+        cd backend
+        pytest tests/ -v --cov=. --cov-report=xml
+        
+    - name: 📊 Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: backend
+        
+  # =============================================================================
+  # Frontend Testing
+  # =============================================================================
+  frontend-tests:
+    name: 🎨 Frontend Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: frontend-web/package-lock.json
+        
+    - name: 📦 Install Dependencies
+      run: |
+        cd frontend-web
+        npm ci
+        
+    - name: 🔍 Lint Code
+      run: |
+        cd frontend-web
+        npm run lint
+        
+    - name: 🧪 Run Tests
+      run: |
+        cd frontend-web
+        npm test -- --coverage --watchAll=false
+        
+    - name: 🏗️ Build Application
+      run: |
+        cd frontend-web
+        npm run build
+        
+  # =============================================================================
+  # Mobile Testing
+  # =============================================================================
+  mobile-tests:
+    name: 📱 Mobile Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: mobile-app/package-lock.json
+        
+    - name: 📦 Install Dependencies
+      run: |
+        cd mobile-app
+        npm ci
+        
+    - name: 🧪 Run Tests
+      run: |
+        cd mobile-app
+        npm test -- --coverage --watchAll=false
+        
+    - name: 📱 Expo Doctor
+      run: |
+        cd mobile-app
+        npx expo doctor
+        
+  # =============================================================================
+  # Security Scanning
+  # =============================================================================
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Run CodeQL Analysis
+      uses: github/codeql-action/init@v2
+      with:
+        languages: python, javascript
+        
+    - name: 🏗️ Autobuild
+      uses: github/codeql-action/autobuild@v2
+      
+    - name: 📊 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      
+    - name: 🔒 Python Security Scan
+      run: |
+        pip install safety bandit
+        safety check -r backend/requirements.txt
+        bandit -r backend/ -f json -o security-report.json
+        
+    - name: 🔒 Node.js Security Scan
+      run: |
+        cd frontend-web
+        npm audit --audit-level=moderate
+        cd ../mobile-app
+        npm audit --audit-level=moderate
+        
+  # =============================================================================
+  # Integration Tests
+  # =============================================================================
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: 📦 Install Backend Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+        
+    - name: 🚀 Start Backend Server
+      run: |
+        cd backend
+        python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+        sleep 10
+      env:
+        PROVIDER: mock
+        DEBUG: true
+        
+    - name: 🧪 Run Integration Tests
+      run: |
+        curl -f http://localhost:8000/health
+        curl -f -X POST http://localhost:8000/analyze \
+          -H "Content-Type: application/json" \
+          -d '{"text":"I feel happy today!"}'
+          
+  # =============================================================================
+  # Docker Build
+  # =============================================================================
+  docker-build:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: 🏗️ Build Backend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        push: false
+        tags: empathy-engine/backend:test
+        
+    - name: 🏗️ Build Frontend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend-web
+        file: ./frontend-web/Dockerfile
+        push: false
+        tags: empathy-engine/frontend:test
+        
+  # =============================================================================
+  # Deployment (Production)
+  # =============================================================================
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, mobile-tests, security-scan, integration-tests]
+    if: github.ref == 'refs/heads/main'
+    
+    environment:
+      name: production
+      url: https://empathy-engine.com
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🚀 Deploy to Production
+      run: |
+        echo "🚀 Deploying to production..."
+        # Add your deployment commands here
+        # e.g., deploy to cloud provider, update containers, etc.
+        
+  # =============================================================================
+  # Notification
+  # =============================================================================
+  notify-success:
+    name: 📢 Notify Success
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, mobile-tests, security-scan]
+    if: success()
+    
+    steps:
+    - name: 🎉 Success Notification
+      run: |
+        echo "✅ All tests passed! Empathy Engine is ready for deployment."
+        
+  notify-failure:
+    name: 📢 Notify Failure
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, mobile-tests, security-scan]
+    if: failure()
+    
+    steps:
+    - name: ❌ Failure Notification
+      run: |
+        echo "❌ Tests failed! Please check the logs for details."

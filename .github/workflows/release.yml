@@ -1,0 +1,149 @@
+name: 🏷️ Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create-release:
+    name: 🎯 Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🏷️ Get Version
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: 📦 Build Release Assets
+      run: |
+        # Create release directory
+        mkdir -p release
+        
+        # Backend assets
+        tar -czf release/empathy-engine-backend-${{ steps.get_version.outputs.VERSION }}.tar.gz \
+          backend/ --exclude=backend/__pycache__ --exclude=backend/.pytest_cache
+          
+        # Frontend assets  
+        cd frontend-web
+        npm ci
+        npm run build
+        tar -czf ../release/empathy-engine-frontend-${{ steps.get_version.outputs.VERSION }}.tar.gz \
+          dist/
+        cd ..
+        
+        # Mobile assets
+        tar -czf release/empathy-engine-mobile-${{ steps.get_version.outputs.VERSION }}.tar.gz \
+          mobile-app/ --exclude=mobile-app/node_modules
+          
+        # Documentation
+        tar -czf release/empathy-engine-docs-${{ steps.get_version.outputs.VERSION }}.tar.gz \
+          docs/
+          
+        # Complete source
+        git archive --format=tar.gz --prefix=empathy-engine-${{ steps.get_version.outputs.VERSION }}/ \
+          HEAD > release/empathy-engine-source-${{ steps.get_version.outputs.VERSION }}.tar.gz
+        
+    - name: 📝 Generate Release Notes
+      id: release_notes
+      run: |
+        # Extract version info
+        VERSION=${{ steps.get_version.outputs.VERSION }}
+        
+        # Create release notes
+        cat > release_notes.md << EOF
+        # 🎉 Empathy Engine ${VERSION}
+        
+        ## 🌟 What's New
+        
+        ### ✨ Features
+        - Enhanced emotion detection accuracy
+        - Improved conversation flow
+        - Better mobile experience
+        - Updated AI model integration
+        
+        ### 🐛 Bug Fixes
+        - Fixed conversation memory issues
+        - Resolved mobile app crashes
+        - Improved error handling
+        - Enhanced security measures
+        
+        ### 🔧 Technical Improvements
+        - Updated dependencies
+        - Performance optimizations
+        - Better test coverage
+        - Enhanced documentation
+        
+        ## 📦 Installation
+        
+        ### Quick Start
+        \`\`\`bash
+        git clone https://github.com/Sandarsh18/Empathy-engine.git
+        cd Empathy-engine
+        ./scripts/setup.sh
+        \`\`\`
+        
+        ### Docker
+        \`\`\`bash
+        docker-compose up --build
+        \`\`\`
+        
+        ## 🔗 Assets
+        
+        - **Backend**: \`empathy-engine-backend-${VERSION}.tar.gz\`
+        - **Frontend**: \`empathy-engine-frontend-${VERSION}.tar.gz\`
+        - **Mobile**: \`empathy-engine-mobile-${VERSION}.tar.gz\`
+        - **Documentation**: \`empathy-engine-docs-${VERSION}.tar.gz\`
+        - **Source Code**: \`empathy-engine-source-${VERSION}.tar.gz\`
+        
+        ## 💚 Mental Health Resources
+        
+        If you or someone you know is struggling with mental health:
+        - 🇺🇸 **National Suicide Prevention Lifeline**: 988
+        - 🇺🇸 **Crisis Text Line**: Text HOME to 741741
+        - 🌍 **International**: Visit [findahelpline.com](https://findahelpline.com)
+        
+        ## 🤝 Contributing
+        
+        Thank you to all contributors who made this release possible! 
+        See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
+        
+        ## 🔒 Security
+        
+        This release includes important security updates. Please update as soon as possible.
+        Report security issues to: security@empathy-engine.dev
+        
+        ---
+        
+        **Full Changelog**: [${VERSION}](https://github.com/Sandarsh18/Empathy-engine/compare/v1.0.0...${VERSION})
+        EOF
+        
+        echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+        cat release_notes.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: 🎉 Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        name: "Empathy Engine ${{ steps.get_version.outputs.VERSION }}"
+        body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+        files: |
+          release/empathy-engine-backend-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          release/empathy-engine-frontend-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          release/empathy-engine-mobile-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          release/empathy-engine-docs-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          release/empathy-engine-source-${{ steps.get_version.outputs.VERSION }}.tar.gz
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 📢 Notify Release
+      run: |
+        echo "🎉 Empathy Engine ${{ steps.get_version.outputs.VERSION }} has been released!"
+        echo "📦 Release assets are now available for download."
+        echo "🚀 Ready for deployment to production environments."
