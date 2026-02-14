@@ -103,9 +103,12 @@ def _gemini_generate_reply(text: str) -> str:
         logger.error("GEMINI_API_KEY not found in environment")
         return "I'm here with you, though I couldn't reach Gemini right now."
     
+    model = settings.gemini_model or "gemini-2.0-flash-002"
+    logger.debug(f"Using Gemini model: {model}")
+    
     try:
         # Prepare the request (Gemini uses API key in URL, not header)
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={settings.gemini_api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={settings.gemini_api_key}"
         headers = {
             "Content-Type": "application/json"
         }
@@ -137,9 +140,12 @@ Your supportive response:"""
                     ]
                 }
             ],
+            # Gemini 2.5 models spend some of the output budget on hidden "thinking" tokens
+            # which count toward maxOutputTokens. Give the model a larger ceiling so replies
+            # are not cut mid-sentence.
             "generationConfig": {
                 "temperature": 0.7,
-                "maxOutputTokens": 200,
+                "maxOutputTokens": 1024,
                 "topP": 0.8,
                 "topK": 40
             }

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     
     # LLM Provider Configuration
     provider: str = "mock"  # Options: "mock", "gemini", "perplexity"
+    gemini_model: str = "gemini-2.0-flash-002"  # Default Gemini model; override with GEMINI_MODEL
     
     # API Keys (set these in production)
     gemini_api_key: Optional[str] = None
